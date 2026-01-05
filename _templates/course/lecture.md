@@ -1,0 +1,5 @@
+---
+date: {{date}}
+order:
+title:
+---
