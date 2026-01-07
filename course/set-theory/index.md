@@ -1,5 +1,5 @@
 ---
-title: 집합 이론
+title: 집합론
 category:
   - 수학
 instructor:
@@ -11,4 +11,5 @@ link:
   - http://kocw.net/home/search/kemView.do?kemId=1432351
 ---
 
+# 소개
 KOCW에서 제공하는 충북대 이석종 교수의 "집합론" 강의.

@@ -10,5 +10,5 @@ provide:
 link:
   - http://www.kocw.net/home/enrolment/enrolmentView.do?cid=6166c077e545b736&lid=dd53ceac302ff18b
 ---
-
 KOCW 에서 제공하는 한양대 이석복 교수의 강의.
+인터넷에 조금 검색해보

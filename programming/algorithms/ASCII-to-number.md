@@ -6,8 +6,9 @@ tags:
   - 모듈러
   - 프로그래머스
 title: ASCII -> 문자
+link:
+  - https://school.programmers.co.kr/learn/courses/30/lessons/155652
 ---
-https://school.programmers.co.kr/learn/courses/30/lessons/155652
 
 `s , skip, index` 세 인자를 받는다.
 s는 암호문, s의 각 글자들의 ASCII코드에서 index만큼 더한 문자가 복호화된 문자다.

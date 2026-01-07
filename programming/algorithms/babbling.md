@@ -5,8 +5,9 @@ tags:
   - 알고리즘
   - 프로그래머스
 title: 옹알이
+link:
+  - https://school.programmers.co.kr/learn/courses/30/lessons/133499
 ---
-https://school.programmers.co.kr/learn/courses/30/lessons/133499
 
 ```js
 function solution2(babbling) {

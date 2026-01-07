@@ -1,7 +1,7 @@
 ---
 title: 통합 테스트 작성하기
 date: 2025-11-04
-order: 2
+order: 5
 ---
 # 1. ProductFilter 컴포넌트
 

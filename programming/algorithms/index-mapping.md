@@ -6,9 +6,11 @@ tags:
   - 인덱스매핑
   - 수학적최적화
   - 범위제한
+link:
+  - https://school.programmers.co.kr/learn/courses/30/lessons/87390
 ---
 # n^2 배열 자르기 문제
-https://school.programmers.co.kr/learn/courses/30/lessons/87390
+
 ## 초안
 ```js
 function solution(n, left, right) {
