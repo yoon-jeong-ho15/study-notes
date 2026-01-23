@@ -116,4 +116,134 @@ function useRef(initialValue) {
 }
 ```
 
-
+## 예시 문제
+
+### 1.
+
+```jsx
+export default function Chat() {
+  const [text, setText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  let timeoutID = null;
+
+  function handleSend() {
+    setIsSending(true);
+    timeoutID = setTimeout(() => {
+      alert('Sent!');
+      setIsSending(false);
+    }, 3000);
+  }
+
+  function handleUndo() {
+    setIsSending(false);
+    clearTimeout(timeoutID);
+  }
+
+  return (
+	  //...
+```
+
+`handleUndo`를 눌러도 취소되지 않는 이유는 `timeoutID`를 일반 변수로 선언했기 때문이다. 보내기 버튼을 누르면 상태가 변경되면서 컴포넌트가 리렌더링 되는대 일반 변수는 사라진다.  그래서 undo 버튼은 아마 `clearTimeout(null)` 을 호출하게 될거고 그래서 취소되지 않는것.
+
+### 2.
+
+```Jsx
+export default function Toggle() {
+  const isOnRef = useRef(false);
+
+  return (
+    <button onClick={() => {
+      isOnRef.current = !isOnRef.current;
+    }}>
+      {isOnRef.current ? 'On' : 'Off'}
+    </button>
+  );
+}
+```
+
+토글 버튼을 눌러도 On과 Off 문구가 바뀌지 않는 이유는, ref는 리렌더링을 촉발하지 않기 때문이다. `console.log(isOnRef.current)`를 찍어보면 버튼을 누를때마다 값은 변하는걸 확인할 수 있다.
+
+### 3.  debouncing
+
+```jsx
+let timeoutID;
+
+function DebouncedButton({ onClick, children }) {
+  return (
+    <button onClick={() => {
+      clearTimeout(timeoutID);
+      timeoutID = setTimeout(() => {
+        onClick();
+      }, 1000);
+    }}>
+      {children}
+    </button>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <>
+      <DebouncedButton
+        onClick={() => alert('Spaceship launched!')}
+      >
+        Launch the spaceship
+      </DebouncedButton>
+      <DebouncedButton
+        onClick={() => alert('Soup boiled!')}
+      >
+        Boil the soup
+      </DebouncedButton>
+      <DebouncedButton
+        onClick={() => alert('Lullaby sung!')}
+      >
+        Sing a lullaby
+      </DebouncedButton>
+    </>
+  )
+}
+```
+
+*디바운싱*이란 짧은 순간에 이벤트가 많이 발생할때 마지막 한번만 이벤트를 처리하는 방식을 말한다. 
+위에서 버튼을 누를때 마다 **기존 타이머를 지우고 새로운 타이머를 설정**해 1초 뒤에 알림창이 등장한다.
+위 코드의 문제는 각 버튼들마다 독립적으로 디바운싱 처리를 하지 못한다는 것인데, 간단히 `let timeoutID` 라고 컴포넌트 밖에서 변수를 선언하고 그걸 사용하고 있기 때문에 모든 버튼들이 하나의 변수를 공유하고 있기 때문이다. 버튼 컴포넌트 안에서 ref를 사용해 해결한다.
+
+### 4. 최신 state 읽기
+
+```jsx
+export default function Chat() {
+  const [text, setText] = useState('');
+  const textRef = useRef(text);
+
+  function handleChange(e) {
+    setText(e.target.value);
+    textRef.current = e.target.value;
+  }
+
+  function handleSend() {
+    setTimeout(() => {
+      alert('Sending: ' + textRef.current);
+    }, 3000);
+  }
+
+  return (
+    <>
+      <input
+        value={text}
+        onChange={handleChange}
+      />
+      <button
+        onClick={handleSend}>
+        Send
+      </button>
+    </>
+  );
+}
+```
+
+실제로 이렇게 설계해야 할 경우는 많지 않지만 (Usually, this behavior is what you want in an app. However, there may be occasional cases where you want some asynchronous code to read the latest version of some state.), 위의 코드처럼 최신 상태를 읽기 위해 ref를 사용할 수도 있다.
+
+`alert()` 함수가 호출되면서 전달받은 매개변수는 상태가 변경되어 컴포넌트가 리렌더링 되어도 같은 값을 가지고 있기 때문이다. (리액트는 상태를 변경하지 않고 setter로 아예 새로운 값으로 변경한다.) 
+
+
+

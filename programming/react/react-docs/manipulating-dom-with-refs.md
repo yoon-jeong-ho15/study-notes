@@ -5,7 +5,7 @@ link:
   - https://react.dev/learn/manipulating-the-dom-with-refs
 ---
 기본적으로 리액트는 DOM 조작을 개발자 대신 해준다.
-선언형 방식으로 UI가 어떻게 그려져야 하는지에 대한 설계도만 작성하면 리액트가 매 순간 그에 알맞게 그려주는것인데, 그래서 특정한 방법을 통해서만 리액트 밖의 요소들을 조종할 수 있다.
+*선언형* 방식으로 UI가 어떻게 그려져야 하는지에 대한 설계도만 작성하면 리액트가 매 순간 그에 알맞게 그려주는것인데, 그래서 특정한 방법을 통해서만 리액트 밖의 요소들을 조종할 수 있다.
 
 공식 문서에서는 **탈출구 "Escape Hatches"** 라고 표현하는데 말 그대로 리액트 밖에 나가게 해주는 방법들이다. 여기에는 ref와 effect 두 방식이 있는데 ref로는 외부에 직접적으로 접근해서 제어할 수 있고, effect로는 리액트 컴포넌트와 외부 시스템을 동기화 할 수 있다. 그리고 둘이 함께 사용되는 경우가 매우 잦다.
 
@@ -163,7 +163,7 @@ export default function Form() {
 
 그리고 ref는 커밋단계에서 노드들과 연결된다. 이는 즉 ref를 사용하려면 이벤트 핸들러나 이펙트처럼, 화면이 다 그려져야 실행될 수 있는 훅과 함수에서 사용해야 한다는 의미다.
 
-### `flushSync` 
+### `flushSync` , 동기 방식으로 상태 업데이트
 
 ```Jsx
 function handleAdd() {
@@ -199,3 +199,65 @@ function handleAdd() {
 
 하지만 리액트를 개발하면서 괜히 리렌더링을 배칭 처리 방식으로 설정한것은 아닐것이다. 따라서 이 배칭 방식을 강제로 무시하는 `flushSync`는 최소한으로 사용되어야 할 것이다.
 
+## 예시 문제
+
+1,2,4번 문제는 쉬워서 생략
+
+### 3. 이미지 스크롤
+
+```jsx
+export default function CatFriends() {
+  const selectedRef = useRef(null);
+  const [index, setIndex] = useState(0);
+
+  return (
+    <>
+      <nav>
+        <button onClick={() => {
+          flushSync(() => {
+            if (index < catList.length - 1) {
+              setIndex(index + 1);
+            } else {
+              setIndex(0);
+            }
+          });
+          selectedRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+          });
+        }}>
+          Next
+        </button>
+      </nav>
+      <div>
+        <ul>
+          {catList.map((cat, i) => (
+            <li
+              key={cat.id}
+              ref={index === i ?
+                selectedRef :
+                null
+              }
+            >
+              <img
+                className={
+                  index === i ?
+                    'active'
+                    : ''
+                }
+                src={cat.imageUrl}
+                alt={'Cat #' + cat.id}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  );
+}
+```
+
+Next 버튼을 누르면 `index`가 `flushSync`로 업데이트되면서 리렌더링 
+-> `index`와 일치하는 노드에 `selectedRef` 연결 
+-> `scollIntoView` 
