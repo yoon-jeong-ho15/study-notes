@@ -141,3 +141,149 @@ function useTimer(callback, delay) {
 
 ## 예시 문제
 
+### 2. 잠깐 멈추는 카운터
+
+```jsx
+export default function Timer() {
+  const [count, setCount] = useState(0);
+  const [increment, setIncrement] = useState(1);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCount(c => c + increment);
+    }, 1000);
+    return () => {
+      clearInterval(id);
+    };
+  }, [increment]);
+
+```
+
+이펙트가 다시 실행되면서 타이머가 새롭게 설정되기 때문에 `increment`를 조정할 때 잠깐 프리징되는 현상이 발생한다.
+
+```jsx
+  const onTick = useEffectEvent(() => {
+    setCount(c => c + increment);
+  });
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      onTick();
+    }, 1000);
+    return () => {
+      clearInterval(id);
+    };
+  }, []);
+```
+
+이렇게 `increment` 의존성을 제거하고 `useEffectEvent` 훅을 사용하면 된다.
+
+### 3. 딜레이 설정이 적용 안되는 카운터
+
+```jsx
+export default function Timer() {
+  const [count, setCount] = useState(0);
+  const [increment, setIncrement] = useState(1);
+  const [delay, setDelay] = useState(100);
+
+  const onTick = useEffectEvent(() => {
+    setCount(c => c + increment);
+  });
+
+  const onMount = useEffectEvent(() => {
+    return setInterval(() => {
+      onTick();
+    }, delay);
+  });
+
+  useEffect(() => {
+    const id = onMount();
+    return () => {
+      clearInterval(id);
+    }
+  }, []);
+```
+
+인터벌 딜레이를 변경해도 적용이 되지 않는다. 적용이 안되는 이유는 이펙트가 `delay` 값에 반응하지 않기 때문이다.
+
+```jsx
+
+  const onTick = useEffectEvent(() => {
+    setCount(c => c + increment);
+  });
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      onTick();
+    }, delay);
+    return () => {
+      clearInterval(id);
+    }
+  }, [delay]);
+```
+
+`onMount` 의 로직은 이펙트가 가져야하는 반응형 로직이다. 
+
+### 4. 알림창 딜레이
+
+```Jsx
+function ChatRoom({ roomId, theme }) {
+  const onConnected = useEffectEvent(() => {
+    showNotification('Welcome to ' + roomId, theme);
+  });
+
+  useEffect(() => {
+    const connection = createConnection(serverUrl, roomId);
+    connection.on('connected', () => {
+      setTimeout(() => {
+        onConnected();
+      }, 2000);
+    });
+    connection.connect();
+    return () => connection.disconnect();
+  }, [roomId]);
+
+```
+
+채팅방을 general -> travel -> music 로 빠르게 두 번 변경하면 알림창은 music 알림창 두 개가 뜬다. travel 하나 music 하나가 뜨도록 수정해야 한다.
+
+이건 반대로 이펙트 이벤트로 분리하면서 최신 `roomId`를 가져와서 발생하는 문제다.
+하지만 이펙트 안에 넣어서 문제를 해결하려면 `theme`도 의존성 배열에 들어가야 해서 불가능.
+`onConnected`가 최신 `rooomId`를 읽지 못하게 하려면 어떻게 해야할까? 보니까 정답은 직접 `onConnected`함수에 인자로 건내주는 것이다.
+
+```jsx
+  const onConnected = useEffectEvent(connectedRoomId => {
+    showNotification('Welcome to ' + connectedRoomId, theme);
+  });
+
+  useEffect(() => {
+    const connection = createConnection(serverUrl, roomId);
+    connection.on('connected', () => {
+      setTimeout(() => {
+        onConnected(roomId);
+      }, 2000);
+    });
+```
+
+그런데 추가로 생각해보면 과연 알림창을 굳이 두 번 보여줄 필요가 있을까? 
+문제에서도 추가로 *디바운스*를 적용해 마지막 접속 채널에 대한 알림만 보여주는 방식을 소개한다.
+
+```jsx
+ useEffect(() => {
+    const connection = createConnection(serverUrl, roomId);
+    let notificationTimeoutId;
+    connection.on('connected', () => {
+      notificationTimeoutId = setTimeout(() => {
+        onConnected(roomId);
+      }, 2000);
+    });
+    connection.connect();
+    return () => {
+      connection.disconnect();
+      if (notificationTimeoutId !== undefined) {
+        clearTimeout(notificationTimeoutId);
+      }
+    };
+  }, [roomId]);
+```
+
