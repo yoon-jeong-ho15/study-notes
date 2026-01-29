@@ -1,9 +1,9 @@
 ---
-title: 통합 테스트 작성하기
-date: 2025-11-04
-order: 5
+title: 통합 테스트 작성 - ProductFilter
+date: 2025-10-21
+order: 7
 ---
-# 1. ProductFilter 컴포넌트
+# ProductFilter 컴포넌트
 
 이 컴포넌트는 상품명, 카테고리, 가격 범위 등의 검색 조건을 선택해 화면에 보일 상품들의 목록을 변경하는 컴포넌트다.
 
@@ -23,9 +23,9 @@ order: 5
 	- `setCategoryId`
 	- `setMinPrice` 와 `setMaxPrice`
 
-위의 함수들은 모두 `useFilterStore` 주스탠드 스토어 액션들이다. 그러면 우리는 `useFilterStore`를 모킹해야 함을 알 수 있다.
+위의 함수들은 모두 `useFilterStore` 주스탠드 스토어 액션들이다. 그러면 우리는 **`useFilterStore`를 모킹해야 함**을 알 수 있다.
 그리고 그 전에 확인해야 하는것이 있는데 바로 카테고리 목록을 가져오는 api `useCategories`에 대한 모킹이다.
-### api 모킹 - MSW
+## api 모킹 - MSW
 
 여기서 선택될 카테고리들의 목록은 `useCategories` 훅을 사용해 서버에서 가져온다.
 (`ProductFilter` 내부의 `CategoryRadioGroup` 컴포넌트에서 사용중)
@@ -37,6 +37,7 @@ const useCategories = options =>
 
 원래라면 이 코드는 서버에서 데이터를 가져오겠지만, msw를 사용하면 대신`src/__mocks__/handler.js` 에 적힌대로 작동한다.
 예제 코드에서는 `src/__mocks__/response` 에 작성한 json 파일을 불러와 전달하는것으로 되어있다.
+
 ```js
 // handler.js
 import response from '@/__mocks__/response';
@@ -70,7 +71,7 @@ it('카테고리 목록을 가져온 후 카테고리 필드의 정보들이 올
 
 위의 테스트를 실행하면 api가 json에 작성되어 있는대로 잘 가져온다는 것을 확인할 수 있다.
 
-### 스토어 모킹
+## 스토어 모킹
 
 데이터 패칭 api가 작동하는 것을 검증했으니 이제 도메인들을 검증해야 한다.
 테스트 방식은 모킹 함수를 `toHaveBeenCalledWith()` 매처로 확인하는 방식을 사용한다. (위에서도 설명했듯, 실제 화면에 렌더링 하는 컴포넌트는 다른 컴포넌트고 지금 진행하는 테스트의 범위를 벗어난다.)
@@ -101,6 +102,3 @@ it('최소 가격 또는 최대 가격을 수정하면 setMinPrice과 setMaxPric
   expect(setMaxPriceFn).toHaveBeenCalledWith('2');
 });
 ```
-
-
-
