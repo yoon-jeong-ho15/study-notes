@@ -111,7 +111,7 @@ const fullName = firstName + ' ' + lastName;
 
 이렇게 일반 변수로 선언하여 관리하면, 렌더링마다 최신 값을 읽을 수 있으면서도 굳이 `setFullName`으로 업데이트를 할 필요도 없어진다.
 
-### 중복된 state
+### 4. 중복된 state
 
 ```jsx
 export default function Menu() {
@@ -185,7 +185,7 @@ items = {
   );
 ```
 
-### 깊게 중첩된 state
+### 5. 깊게 중첩된 state
 
 다음과 같은 구조를 가진 state를 가정해보자
 
@@ -345,3 +345,140 @@ function PlaceTree({ id, placesById }) {
 ```
 
 ## 예시 문제
+
+### 1. 업데이트되지 않는 컴포넌트
+
+```jsx
+export default function Clock(props) {
+  const [color, setColor] = useState(props.color);
+  return (
+    <h1 style={{ color: color }}>
+      {props.time}
+    </h1>
+  );
+}
+```
+
+props로 `color`와 `time`을 받고있는데 또 다시 `color` state를 선언하여 가진다. 상위 컴포넌트에서 색을 변경해도 state에 영향을 주지 않게된다(컴포넌트가 마운트될 때 가졌던 초기값을 state로 간직하지만, 그걸 변경하는 트리거가 없기 때문에). state를 무분별하게 사용하여 발생하는 문제. 직접 `props.color`를 받아 사용하면 부모의 state 변경에 맞춰 색이 변하게 된다.
+
+### 2. 고장난 체크리스트
+
+물품을 체크한 후에 삭제를 해도 카운터에 반영되지 않는 등의 문제가 있다.
+
+```jsx
+let nextId = 3;
+const initialItems = [
+  { id: 0, title: 'Warm socks', packed: true },
+  { id: 1, title: 'Travel journal', packed: false },
+  { id: 2, title: 'Watercolors', packed: false },
+];
+
+export default function TravelPlan() {
+  const [items, setItems] = useState(initialItems);
+  const [total, setTotal] = useState(3);
+  const [packed, setPacked] = useState(1);
+
+  function handleAddItem(title) {
+    setTotal(total + 1);
+    setItems([
+      ...items,
+      {
+        id: nextId++,
+        title: title,
+        packed: false
+      }
+    ]);
+  }
+
+  function handleChangeItem(nextItem) {
+    if (nextItem.packed) {
+      setPacked(packed + 1);
+    } else {
+      setPacked(packed - 1);
+    }
+    setItems(items.map(item => {
+      if (item.id === nextItem.id) {
+        return nextItem;
+      } else {
+        return item;
+      }
+    }));
+  }
+
+  function handleDeleteItem(itemId) {
+    setTotal(total - 1);
+    setItems(
+      items.filter(item => item.id !== itemId)
+    );
+  }
+
+  return (
+    <>  
+      <AddItem
+        onAddItem={handleAddItem}
+      />
+      <PackingList
+        items={items}
+        onChangeItem={handleChangeItem}
+        onDeleteItem={handleDeleteItem}
+      />
+      <hr />
+      <b>{packed} out of {total} packed!</b>
+    </>
+  );
+}
+```
+
+`total`, `packed`같은 불필요한 state들을 가지기 떄문에 발생하는 문제. 정확히는 이 state들을 제대로 변경하지 않기 때문에 발생하는 문제이지만. 
+- `handleDeleteItem`에서 `packed` state를 업데이트 하지 않는다.
+
+### 3. 선택 사라짐 
+
+코드가 '정상적'으로 작동을 하기는 한다. 다만 "star"와 "unstar"를 눌러 둘 사이를 오갈 때 잠깐 호버할때 보이는 하이라이트 효과가 잠깐 꺼진다. 정확히는 마우스를 움직이지 않으면 하이라이트가 돌아오지 않는다.
+
+```jsx
+export default function MailClient() {
+  const [letters, setLetters] = useState(initialLetters);
+  const [highlightedLetter, setHighlightedLetter] = useState(null);
+
+  function handleHover(letter) {
+    setHighlightedLetter(letter);
+  }
+
+  function handleStar(starred) {
+    setLetters(letters.map(letter => {
+      if (letter.id === starred.id) {
+        return {
+          ...letter,
+          isStarred: !letter.isStarred
+        };
+      } else {
+        return letter;
+      }
+    }));
+  }
+
+  return (
+    <>
+      <h2>Inbox</h2>
+      <ul>
+        {letters.map(letter => (
+          <Letter
+            key={letter.id}
+            letter={letter}
+            isHighlighted={
+              letter === highlightedLetter
+            }
+            onHover={handleHover}
+            onToggleStar={handleStar}
+          />
+        ))}
+      </ul>
+    </>
+  );
+}
+```
+
+따악 보니 첫눈에 문제의 원인이 무엇인지는 일단 알겠다. `highlightedLetter`가 `letter`와 중복된 state이기 때문인 것 같다. 즉 객체 전체를 state로 사용하면 안되고 선택된 letter의  id만 state로 사용해야 하는 것 같다. 그런데 그게 왜 이런 문제를 일으키는거지..? 이유를 알기 위해 다시 위로 올라가서 본문을 읽었다.
+
+그러니까 "star" 혹은 "unstar"  버튼을 누르면 `letters` state가 업데이트 된다. 하지만 `highlightedLetter`는 아직 업데이트 전에 머물러 있고, 비로소 사용자가 마우스를 움직여야 `setHilightedLetter`가 호출되어 업데이트 되는 동기화가 이루어지기 떄문에.
