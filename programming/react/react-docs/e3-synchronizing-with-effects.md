@@ -4,6 +4,14 @@ date: 2026-01-21
 link:
   - https://react.dev/learn/synchronizing-with-effects
 ---
+### You will learn
+
+- effect란 무엇인지
+- effect와 이벤트의 차이
+- 컴포넌트에서 effect를 정의하는 방법
+- 불필요한 effect 재실행을 건너뛰는 방법
+- 왜 개발 환경에서 effect가 두 번 실행되는지, 그리고 어떻게 해결하는지
+
 ## 이펙트란?
 
 리액트 컴포넌트 안에는 두 종류의 코드가 있다.

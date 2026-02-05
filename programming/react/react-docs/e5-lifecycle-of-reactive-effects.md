@@ -4,6 +4,17 @@ date: 2026-01-26
 link:
   - https://react.dev/learn/lifecycle-of-reactive-effects
 ---
+### You will learn
+
+- effect의 생명주기와 컴포넌트의 생명주기의 차이
+- 각 effect를 독립적으로 생각하는 방법
+- 언제 그리고 왜 effect가 재동기화 해야 하는지
+- 어떻게 effect의 의존성이 결정되는지
+- 어떤 값이 '반응형 reactive' 이라는 것의 의미
+- 비어있는 의존성 배열이 가지는 의미
+- 리액트는 어떻게 effect의 의존성 배열이 올바른지 검증하는지
+- 린터에 동의하지 않을 때 어떻게 해야하는지
+
 ## 이펙트의 생명주기
 
 컴포넌트의 생명주기는 다음과 같다 :

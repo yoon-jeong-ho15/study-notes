@@ -4,6 +4,14 @@ date: 2026-01-21
 link:
   - https://react.dev/learn/separating-events-from-effects
 ---
+### You will learn
+
+- 이벤트 핸들러와 effect 중에 선택하는 방법
+- effect가 반응형이고 이벤트 핸들러는 그렇지 않은 이유
+- effect의 일부 코드가 반응형이지 않길 바랄 때 할 수 있는 방법들
+- effect event를 정의하고 effect 에서 분리하는 방법
+- effect event를 통해 effect에서 최신의 props나 state를 읽는 방법
+
 ## 이벤트 핸들러 vs 이펙트
 
 이벤트 핸들러는 말 그대로 사용자 이벤트에 의해 촉발되어서 실행되는 코드고, 이펙트는 *동기화 synchronization*이 필요할 때 마다 실행되는 코드다.

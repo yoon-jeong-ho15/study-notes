@@ -4,6 +4,12 @@ title: Reacting to Input with State
 link:
   - https://react.dev/learn/reacting-to-input-with-state
 ---
+### You will learn
+
+- 선언형 프로그래밍 방식과 명령형 방식의 차이
+- 컴포넌트가 가져야 할 시각적 state들을 나열하는 법
+- 한 시각적 state에서 다른 시각적 state로 넘어가는 방법
+
 ## 선언형 UI 
 
 UI를 생각할 때 우리들은 보통 사용자들의 행동에 맞춰 변화하는것이라 생각한다. 가령 사용자가 폼을 제출하는 경우를 생각해보자 :
